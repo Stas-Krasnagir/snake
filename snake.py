@@ -1,28 +1,130 @@
-from tkinter import *
+import tkinter as tk
+from PIL import Image, ImageTk
 
-root = Tk()
+MOVE_INCREMENT = 20
+MOVES_PER_SECOND = 15
+GAME_SPEED = 1000 // MOVES_PER_SECOND
 
-but_up = Button(root, text="Up", width=7, height=3)
-but_down = Button(root, text="Down", width=7, height=3)
-but_left = Button(root, text="Left", width=7, height=3)
-but_right = Button(root, text="Right", width=7, height=3)
 
-but_up['activebackground'] = '#555555'
-but_down['activebackground'] = '#555555'
-but_left['activebackground'] = '#555555'
-but_right['activebackground'] = '#555555'
+class Snake(tk.Canvas):  # Создаем класс для записи атрибутов змейки
+    # (суперкласс для унаследования атрибутов основного класса)
+    # созадли для передачи свойств на холст
+    def __init__(self):
+        super().__init__(width=600, height=620, background="black", highlightthickness=0)
+        # задали размер и фон окна (толщина святового пятна,
+        # highlightthickness - рамка активного окна, если 0 - рамки не видно)
 
-but_right.pack(side='right', padx=10, pady=10)
-but_left.pack(side='left', padx=10, pady=10)
-but_up.pack(side='top', padx=10, pady=10)
-but_down.pack(side='bottom', padx=10, pady=10)
+        self.snake_positions = [(100, 100), (80, 100), (60, 100)]
+        # задали кортеж с координатами x и y начального положения тела змеи
 
-root.mainloop()
+        self.food_position = (200, 100)
+        self.score = 0
 
-# Далее, чтобы написать GUI-программу, надо выполнить приблизительно следующее:
-# Создать главное окно.
-# Создать виджеты и выполнить конфигурацию их свойств (опций).
-# Определить события, то есть то, на что будет реагировать программа.
-# Описать обработчики событий, то есть то, как будет реагировать программа.
-# Расположить виджеты в главном окне.
-# Запустить цикл обработки событий.
+        self.directions = "Right"
+        self.bind_all("<Key>", self.on_key_press)
+
+        self.load_assets()
+
+        self.create_objects()  # метод для размещения элементы на активном окне игры
+
+        self.after(GAME_SPEED, self.perform_actions)  # вызываем первый раз
+
+    def load_assets(self):  # метод позволяющий импортировать изображения
+        # обработка исключенийй, обернутая конструкция try/except
+        try:  # используем try если не закиним ихображения в корень с файлом приложения
+            self.snake_body_image = Image.open("./assets/snake.png")  # считываем файл изображения
+            self.snake_body = ImageTk.PhotoImage(self.snake_body_image)
+            # переменная для втавки в класс изображения тела змеи
+            self.food_image = Image.open("./assets/food.png")
+            self.food = ImageTk.PhotoImage(self.food_image)
+        except IOError as error:
+            # IOError – возникает в том случае, когда операция I/O
+            # (такая как оператор вывода, встроенная функция open() или метод объекта-файла) не может быть выполнена,
+            # по связанной с I/O причине: «файл не найден», или «диск заполнен», иными словами.
+            root.destroy()  # закроет окно приложения в случае ошибки
+            raise
+
+    def create_objects(self):
+        self.create_text(
+            45, 12, text=f"Score {self.score}", tag="score", fill="#fff", font=("TkDefaultFront", 14))
+        # метод для размещения текста на холсте.
+        # Задаем х и у, текст с использованием ф-стринг, устанавливаем цвет текста и его фон, кегель
+
+        for x_position, y_position in self.snake_positions:
+            # перебераем занчения х и у для отрисовки змейки на холсте
+            self.create_image(x_position, y_position, image=self.snake_body, tag="snake")
+
+        self.create_image(*self.food_position, image=self.food, tag="food")
+        # метод для размещения еды на холсте
+        # (self.food_position[0], self.food_position[1]) заменили
+        # на * для сокращения кода, первая переменная не используется)
+
+        self.create_rectangle(7, 27, 593, 613, outline="#525d69")
+        # создаем гарницу актвного окна игры для ограничения движения змейки.
+        # Метод размещает прямоугольник на холсте, передаем верхний левый х и у, после нижние правые координаты,
+        # устанавливаем цвет линии
+
+    def move_snake(self):
+        head_x_position, head_y_position = self.snake_positions[0]
+        # связали переменные с координатом головы змейки
+        # в зависимости от нажатой клавиши меняем координаты головы змейки
+        if self.directions == "Left":
+            new_head_position = (head_x_position - MOVE_INCREMENT, head_y_position)
+        elif self.directions == "Right":
+            new_head_position = (head_x_position + MOVE_INCREMENT, head_y_position)
+        elif self.directions == "Down":
+            new_head_position = (head_x_position, head_y_position + MOVE_INCREMENT)
+        elif self.directions == "Up":
+            new_head_position = (head_x_position, head_y_position - MOVE_INCREMENT)
+
+        self.snake_positions = [new_head_position] + self.snake_positions[:-1]
+        # обнавляем положение тела змейки на холсте с учетом изменений при движении.
+        # В "листе" меняем первый элемент на новые координаты положения головы змейки + положение до(- хвост)
+
+        for segment, position in zip(self.find_withtag("snake"), self.snake_positions):
+            # цикл для проверки на ограничения (края прямоугольника)
+
+            # zip - Создайте итератор, который объединяет элементы из каждой итерации. Возвращает итератор кортежей,
+            # где i-й кортеж содержит i-й элемент из каждой из последовательностей аргументов или итераций.
+            # https://docs.python.org/3/library/functions.html#zip
+
+            # find_withtag метод tkinter для поиска объектов по тегу
+
+            self.coords(segment, position)
+
+    def perform_actions(self):
+        if self.check_collisions():
+            return  # наступление крайнего события -> True
+        self.move_snake()
+        self.after(GAME_SPEED, self.perform_actions)  # каждые 75 мс вызывает функцию
+        # .after - метод Tkinter, .after(parent, ms, function = None, *args) где:
+        # parent: is the object of the widget or main window whichever is using this function.
+        # ms: is the time in miliseconds.
+        # function: which shall be called.
+        # *args: other options.
+
+    def check_collisions(self):  # метод для проверки наступления крайних событий, возвращает boolean
+        head_x_position, head_y_position = self.snake_positions[0]
+        return (head_x_position in (0, 600)  # пересечение х
+                or head_y_position in (20, 620)  # пересечение у
+                or (head_x_position, head_y_position) in self.snake_positions[1:])  # пересечение тела змейки
+
+    def on_key_press(self, e):
+        new_direction = e.keysym
+        all_directions = ("Up", "Down", "Left", "Right")
+        opposites = ({"Up", "Down"}, {"Left", "Right"})
+        if (new_direction in all_directions and {new_direction, self.directions} not in opposites):
+            # проверка на движение в себя
+            self.directions = new_direction
+
+
+root = tk.Tk()  # создаем основное окно игры
+root.title("Snake")  # присваиваем имя окну приложения
+root.resizable(False, False)  # уставнавливаем размер окна
+
+board = Snake()  # экземпляр класса
+board.pack()  # размещаем экземпляр класса на окне приложения
+
+canvas = tk.Canvas()  # создаем "холст" автивное окно приложения
+
+root.mainloop()  # вызываем функцию для запуска приложения

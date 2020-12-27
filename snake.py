@@ -1,9 +1,10 @@
+from random import randint
 import tkinter as tk
 from PIL import Image, ImageTk
 
 MOVE_INCREMENT = 20
-MOVES_PER_SECOND = 15
-GAME_SPEED = 1000 // MOVES_PER_SECOND
+moves_per_second = 10
+GAME_SPEED = 1000 // moves_per_second
 
 
 class Snake(tk.Canvas):  # Создаем класс для записи атрибутов змейки
@@ -17,7 +18,8 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
         self.snake_positions = [(100, 100), (80, 100), (60, 100)]
         # задали кортеж с координатами x и y начального положения тела змеи
 
-        self.food_position = (200, 100)
+        self.food_position = self.set_new_food_position()
+        # вызываем функцию для нового расположения еды
         self.score = 0
 
         self.directions = "Right"
@@ -46,7 +48,8 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
 
     def create_objects(self):
         self.create_text(
-            45, 12, text=f"Score {self.score}", tag="score", fill="#fff", font=("TkDefaultFront", 14))
+            100, 12, text=f"Score {self.score} (speed: {moves_per_second})",
+            tag="score", fill="#fff", font=("TkDefaultFront", 14))
         # метод для размещения текста на холсте.
         # Задаем х и у, текст с использованием ф-стринг, устанавливаем цвет текста и его фон, кегель
 
@@ -65,6 +68,7 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
         # устанавливаем цвет линии
 
     def move_snake(self):
+        global new_head_position
         head_x_position, head_y_position = self.snake_positions[0]
         # связали переменные с координатом головы змейки
         # в зависимости от нажатой клавиши меняем координаты головы змейки
@@ -94,6 +98,7 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
 
     def perform_actions(self):
         if self.check_collisions():
+            self.end_game()
             return  # наступление крайнего события -> True
         self.move_snake()
         self.after(GAME_SPEED, self.perform_actions)  # каждые 75 мс вызывает функцию
@@ -102,6 +107,7 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
         # ms: is the time in miliseconds.
         # function: which shall be called.
         # *args: other options.
+        self.check_food_collision()
 
     def check_collisions(self):  # метод для проверки наступления крайних событий, возвращает boolean
         head_x_position, head_y_position = self.snake_positions[0]
@@ -113,9 +119,46 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
         new_direction = e.keysym
         all_directions = ("Up", "Down", "Left", "Right")
         opposites = ({"Up", "Down"}, {"Left", "Right"})
-        if (new_direction in all_directions and {new_direction, self.directions} not in opposites):
+        if new_direction in all_directions and {new_direction, self.directions} not in opposites:
             # проверка на движение в себя
             self.directions = new_direction
+
+    def check_food_collision(self):
+        if self.snake_positions[0] == self.food_position:
+            self.score += 1
+            self.snake_positions.append(self.snake_positions[-1])
+            # добовляет последний элемент тела змейки в конец списка тем самым увеличивая ее размер
+            self.create_image(*self.snake_positions[-1], image=self.snake_body, tag="snake")
+
+            if self.score % 5 == 0:
+                global moves_per_second
+                moves_per_second += 1
+
+            self.food_position = self.set_new_food_position()
+            self.coords(self.find_withtag("food"), self.food_position)
+
+            score = self.find_withtag("score")
+            self.itemconfigure(score, text=f"Score: {self.score} (speed:{moves_per_second})", tag="score")
+
+    def set_new_food_position(self):
+        x_position = randint(1, 29) * MOVE_INCREMENT
+        y_position = randint(3, 30) * MOVE_INCREMENT
+        food_position = (x_position, y_position)
+
+
+        if food_position not in self.snake_positions:
+            return food_position
+        # проверка для респа новой позиции еды вне тела змейки
+
+    def end_game(self):
+        self.delete(tk.ALL)
+        # метод ТК, удаляет все с активного окна
+        self.create_text(
+            self.winfo_width() / 2,
+            self.winfo_height() / 2,
+            text=f"Game over! You scored {self.score}!",
+            fill="#fff",
+            font=14)
 
 
 root = tk.Tk()  # создаем основное окно игры

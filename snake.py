@@ -2,16 +2,18 @@ from random import randint
 import tkinter as tk
 from PIL import Image, ImageTk
 
-MOVE_INCREMENT = 20
-moves_per_second = 10
-GAME_SPEED = 1000 // moves_per_second
+move_increment = 20
+moves_per_second = 7
+game_speed = 1000 // moves_per_second
+g_width = 600
+g_height = 620
 
 
 class Snake(tk.Canvas):  # Создаем класс для записи атрибутов змейки
     # (суперкласс для унаследования атрибутов основного класса)
     # созадли для передачи свойств на холст
     def __init__(self):
-        super().__init__(width=600, height=620, background="black", highlightthickness=0)
+        super().__init__(width=g_width, height=g_height, background="black", highlightthickness=0)
         # задали размер и фон окна (толщина святового пятна,
         # highlightthickness - рамка активного окна, если 0 - рамки не видно)
 
@@ -20,6 +22,8 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
 
         self.food_position = self.set_new_food_position()
         # вызываем функцию для нового расположения еды
+        self.bonus_position = self.set_new_bonus_position()
+
         self.score = 0
 
         self.directions = "Right"
@@ -29,7 +33,7 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
 
         self.create_objects()  # метод для размещения элементы на активном окне игры
 
-        self.after(GAME_SPEED, self.perform_actions)  # вызываем первый раз
+        self.after(game_speed, self.perform_actions)  # вызываем первый раз
 
     def load_assets(self):  # метод позволяющий импортировать изображения
         # обработка исключенийй, обернутая конструкция try/except
@@ -37,8 +41,13 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
             self.snake_body_image = Image.open("./assets/snake.png")  # считываем файл изображения
             self.snake_body = ImageTk.PhotoImage(self.snake_body_image)
             # переменная для втавки в класс изображения тела змеи
+
             self.food_image = Image.open("./assets/food.png")
             self.food = ImageTk.PhotoImage(self.food_image)
+
+            self.bonus_image = Image.open("./assets/bonus.png")
+            self.bonus = ImageTk.PhotoImage(self.bonus_image)
+
         except IOError as error:
             # IOError – возникает в том случае, когда операция I/O
             # (такая как оператор вывода, встроенная функция open() или метод объекта-файла) не может быть выполнена,
@@ -61,11 +70,7 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
         # метод для размещения еды на холсте
         # (self.food_position[0], self.food_position[1]) заменили
         # на * для сокращения кода, первая переменная не используется)
-
-        self.create_rectangle(7, 27, 593, 613, outline="#525d69")
-        # создаем гарницу актвного окна игры для ограничения движения змейки.
-        # Метод размещает прямоугольник на холсте, передаем верхний левый х и у, после нижние правые координаты,
-        # устанавливаем цвет линии
+        self.create_image(*self.set_new_bonus_position(), image=self.bonus, tag="bonus")
 
     def move_snake(self):
         global new_head_position
@@ -73,13 +78,13 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
         # связали переменные с координатом головы змейки
         # в зависимости от нажатой клавиши меняем координаты головы змейки
         if self.directions == "Left":
-            new_head_position = (head_x_position - MOVE_INCREMENT, head_y_position)
+            new_head_position = (head_x_position - move_increment, head_y_position)
         elif self.directions == "Right":
-            new_head_position = (head_x_position + MOVE_INCREMENT, head_y_position)
+            new_head_position = (head_x_position + move_increment, head_y_position)
         elif self.directions == "Down":
-            new_head_position = (head_x_position, head_y_position + MOVE_INCREMENT)
+            new_head_position = (head_x_position, head_y_position + move_increment)
         elif self.directions == "Up":
-            new_head_position = (head_x_position, head_y_position - MOVE_INCREMENT)
+            new_head_position = (head_x_position, head_y_position - move_increment)
 
         self.snake_positions = [new_head_position] + self.snake_positions[:-1]
         # обнавляем положение тела змейки на холсте с учетом изменений при движении.
@@ -101,7 +106,7 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
             self.end_game()
             return  # наступление крайнего события -> True
         self.move_snake()
-        self.after(GAME_SPEED, self.perform_actions)  # каждые 75 мс вызывает функцию
+        self.after(game_speed, self.perform_actions)  # каждые 75 мс вызывает функцию
         # .after - метод Tkinter, .after(parent, ms, function = None, *args) где:
         # parent: is the object of the widget or main window whichever is using this function.
         # ms: is the time in miliseconds.
@@ -109,10 +114,12 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
         # *args: other options.
         self.check_food_collision()
 
+        self.check_bonus_collision()
+
     def check_collisions(self):  # метод для проверки наступления крайних событий, возвращает boolean
         head_x_position, head_y_position = self.snake_positions[0]
-        return (head_x_position in (0, 600)  # пересечение х
-                or head_y_position in (20, 620)  # пересечение у
+        return (head_x_position in (0, g_width)  # пересечение х
+                or head_y_position in (20, g_height)  # пересечение у
                 or (head_x_position, head_y_position) in self.snake_positions[1:])  # пересечение тела змейки
 
     def on_key_press(self, e):
@@ -134,6 +141,14 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
                 global moves_per_second
                 moves_per_second += 1
 
+            if self.score % 7 == 0:
+                rate_grow = 0
+                while rate_grow < 7:
+                    self.snake_positions.append(self.snake_positions[-1])
+                    self.create_image(*self.snake_positions[-1], image=self.snake_body, tag="snake")
+                    rate_grow += 1
+                    self.score += 1
+
             self.food_position = self.set_new_food_position()
             self.coords(self.find_withtag("food"), self.food_position)
 
@@ -141,14 +156,28 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
             self.itemconfigure(score, text=f"Score: {self.score} (speed:{moves_per_second})", tag="score")
 
     def set_new_food_position(self):
-        x_position = randint(1, 29) * MOVE_INCREMENT
-        y_position = randint(3, 30) * MOVE_INCREMENT
+        x_position = randint(1, (g_width // 20) - 1) * move_increment
+        y_position = randint(3, (g_height // 20) - 1) * move_increment
         food_position = (x_position, y_position)
-
 
         if food_position not in self.snake_positions:
             return food_position
         # проверка для респа новой позиции еды вне тела змейки
+
+    def check_bonus_collision(self):
+        if self.snake_positions[0] == self.bonus_position:
+            global moves_per_second
+            moves_per_second += 5
+            self.bonus_position = self.set_new_bonus_position()
+
+
+
+    def set_new_bonus_position(self):
+        x_position = randint(1, (g_width // 20) - 1) * move_increment
+        y_position = randint(3, (g_height // 20) - 1) * move_increment
+        bonus_position = (x_position, y_position)
+        if bonus_position not in self.snake_positions and bonus_position not in self.food_position:
+            return bonus_position
 
     def end_game(self):
         self.delete(tk.ALL)
@@ -171,3 +200,10 @@ board.pack()  # размещаем экземпляр класса на окне
 canvas = tk.Canvas()  # создаем "холст" автивное окно приложения
 
 root.mainloop()  # вызываем функцию для запуска приложения
+
+# доп заданте:
+# 1) запрос у пользователя размера поля.
+
+# 2) бонус который увеличивает временно размер змеи
+
+# 3) "Молнии" временно увеличивают скорость змейки

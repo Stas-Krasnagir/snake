@@ -8,6 +8,31 @@ game_speed = 1000 // moves_per_second
 g_width = 600
 g_height = 620
 
+class Stasrt_page():
+    def __init__(self):
+        self.width_lable = tk.Label(text="Set width:", font="Arial 14")
+        self.text1 = tk.Entry()
+        self.height_lable = tk.Label(text="Set height:", font="Arial 14")
+        self.text2 = tk.Entry()
+        self.but = tk.Button(text="Start", font="Arial 20", command=self.get_text)
+
+        self.width_lable.grid(column=0, row=0)
+        self.text1.grid(column=1, row=0)
+
+        self.height_lable.grid(column=0, row=1)
+        self. text2.grid(column=1, row=1)
+        self.but.grid(column=1, row=3)
+
+    def get_text(self):
+        g_width = int(self.text1.get())
+        g_height = int(self.text2.get())
+
+    def start(self):
+        self.delete(tk.ALL)
+
+
+
+
 
 class Snake(tk.Canvas):  # Создаем класс для записи атрибутов змейки
     # (суперкласс для унаследования атрибутов основного класса)
@@ -201,9 +226,3 @@ canvas = tk.Canvas()  # создаем "холст" автивное окно п
 
 root.mainloop()  # вызываем функцию для запуска приложения
 
-# доп заданте:
-# 1) запрос у пользователя размера поля.
-
-# 2) бонус который увеличивает временно размер змеи
-
-# 3) "Молнии" временно увеличивают скорость змейки

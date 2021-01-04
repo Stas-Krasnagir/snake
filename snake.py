@@ -8,30 +8,29 @@ game_speed = 1000 // moves_per_second
 g_width = 600
 g_height = 620
 
-class Stasrt_page():
+
+class Start_page(tk.Canvas):
     def __init__(self):
         self.width_lable = tk.Label(text="Set width:", font="Arial 14")
         self.text1 = tk.Entry()
         self.height_lable = tk.Label(text="Set height:", font="Arial 14")
         self.text2 = tk.Entry()
-        self.but = tk.Button(text="Start", font="Arial 20", command=self.get_text)
+        self.but = tk.Button(text="Start", font="Arial 20", command=self.start_snake)
 
         self.width_lable.grid(column=0, row=0)
         self.text1.grid(column=1, row=0)
 
         self.height_lable.grid(column=0, row=1)
-        self. text2.grid(column=1, row=1)
+        self.text2.grid(column=1, row=1)
         self.but.grid(column=1, row=3)
 
-    def get_text(self):
+    def start_snake(self):
+        global g_width
         g_width = int(self.text1.get())
+        global g_height
         g_height = int(self.text2.get())
-
-    def start(self):
-        self.delete(tk.ALL)
-
-
-
+        self.app = Snake()
+        #board.pack()
 
 
 class Snake(tk.Canvas):  # Создаем класс для записи атрибутов змейки
@@ -77,6 +76,7 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
             # IOError – возникает в том случае, когда операция I/O
             # (такая как оператор вывода, встроенная функция open() или метод объекта-файла) не может быть выполнена,
             # по связанной с I/O причине: «файл не найден», или «диск заполнен», иными словами.
+            global root
             root.destroy()  # закроет окно приложения в случае ошибки
             raise
 
@@ -131,15 +131,14 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
             self.end_game()
             return  # наступление крайнего события -> True
         self.move_snake()
+        self.check_food_collision()
+        self.check_bonus_collision()
         self.after(game_speed, self.perform_actions)  # каждые 75 мс вызывает функцию
         # .after - метод Tkinter, .after(parent, ms, function = None, *args) где:
         # parent: is the object of the widget or main window whichever is using this function.
         # ms: is the time in miliseconds.
         # function: which shall be called.
         # *args: other options.
-        self.check_food_collision()
-
-        self.check_bonus_collision()
 
     def check_collisions(self):  # метод для проверки наступления крайних событий, возвращает boolean
         head_x_position, head_y_position = self.snake_positions[0]
@@ -195,8 +194,6 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
             moves_per_second += 5
             self.bonus_position = self.set_new_bonus_position()
 
-
-
     def set_new_bonus_position(self):
         x_position = randint(1, (g_width // 20) - 1) * move_increment
         y_position = randint(3, (g_height // 20) - 1) * move_increment
@@ -215,14 +212,16 @@ class Snake(tk.Canvas):  # Создаем класс для записи атр�
             font=14)
 
 
-root = tk.Tk()  # создаем основное окно игры
-root.title("Snake")  # присваиваем имя окну приложения
-root.resizable(False, False)  # уставнавливаем размер окна
+def main():
+    root = tk.Tk()
+    root.title("Snake")
+    root.resizable(False, False)
+    canvas = tk.Canvas()
+    canvas_1 = tk.Canvas()
+    app = Start_page()
+    #board = Snake()
+    #board.pack()
+    #start = Start_page()
+    root.mainloop()
 
-board = Snake()  # экземпляр класса
-board.pack()  # размещаем экземпляр класса на окне приложения
-
-canvas = tk.Canvas()  # создаем "холст" автивное окно приложения
-
-root.mainloop()  # вызываем функцию для запуска приложения
-
+main()

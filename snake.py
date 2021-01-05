@@ -9,13 +9,15 @@ g_width = 600
 g_height = 620
 
 
-class Start_page(tk.Canvas):
+class StartPage:
     def __init__(self):
+
         self.width_lable = tk.Label(text="Set width:", font="Arial 14")
         self.text1 = tk.Entry()
         self.height_lable = tk.Label(text="Set height:", font="Arial 14")
         self.text2 = tk.Entry()
         self.but = tk.Button(text="Start", font="Arial 20", command=self.start_snake)
+        self.lebel = tk.Label(width=27, font=15)
 
         self.width_lable.grid(column=0, row=0)
         self.text1.grid(column=1, row=0)
@@ -25,12 +27,22 @@ class Start_page(tk.Canvas):
         self.but.grid(column=1, row=3)
 
     def start_snake(self):
-        global g_width
+        global g_width, g_height
         g_width = int(self.text1.get())
-        global g_height
         g_height = int(self.text2.get())
-        self.app = Snake()
-        #board.pack()
+
+        new_window = tk.Toplevel()
+        new_window.title("New Window")
+        new_window.resizable(False, False)
+        new_window.board = Snake()
+        #new_window.board.pack()
+
+
+
+
+
+
+
 
 
 class Snake(tk.Canvas):  # Создаем класс для записи атрибутов змейки
@@ -217,11 +229,9 @@ def main():
     root.title("Snake")
     root.resizable(False, False)
     canvas = tk.Canvas()
-    canvas_1 = tk.Canvas()
-    app = Start_page()
-    #board = Snake()
-    #board.pack()
-    #start = Start_page()
+    app = StartPage()
+    # board = Snake()
+    # board.pack()
     root.mainloop()
 
 main()

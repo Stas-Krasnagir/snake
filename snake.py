@@ -38,6 +38,7 @@ class StartPage:
         board.grid()
 
 
+
 class Snake(tk.Canvas):
     def __init__(self):
         super().__init__(width=g_width, height=g_height, background="black", highlightthickness=0)
@@ -50,8 +51,8 @@ class Snake(tk.Canvas):
         self.load_assets()
         self.create_objects()
         self.after(game_speed, self.perform_actions)
-
     def load_assets(self):
+
         try:
             self.snake_body_image = Image.open("./assets/snake.png")
             self.snake_body = ImageTk.PhotoImage(self.snake_body_image)
@@ -73,10 +74,10 @@ class Snake(tk.Canvas):
             tag="score", fill="#fff", font=("TkDefaultFront", 14))
 
         for x_position, y_position in self.snake_positions:
+
             self.create_image(x_position, y_position, image=self.snake_body, tag="snake")
 
         self.create_image(*self.food_position, image=self.food, tag="food")
-
         self.create_image(*self.set_new_bonus_position(), image=self.bonus, tag="bonus")
 
     def move_snake(self):
@@ -117,13 +118,13 @@ class Snake(tk.Canvas):
         all_directions = ("Up", "Down", "Left", "Right")
         opposites = ({"Up", "Down"}, {"Left", "Right"})
         if new_direction in all_directions and {new_direction, self.directions} not in opposites:
+            # проверка на движение в себя
             self.directions = new_direction
 
     def check_food_collision(self):
         if self.snake_positions[0] == self.food_position:
             self.score += 1
             self.snake_positions.append(self.snake_positions[-1])
-
             self.create_image(*self.snake_positions[-1], image=self.snake_body, tag="snake")
 
             if self.score % 5 == 0:
@@ -167,7 +168,6 @@ class Snake(tk.Canvas):
 
     def end_game(self):
         self.delete(tk.ALL)
-
         self.create_text(
             self.winfo_width() / 2,
             self.winfo_height() / 2,

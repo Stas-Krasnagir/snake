@@ -11,7 +11,6 @@ g_height = 620
 
 class StartPage:
     def __init__(self):
-
         self.width_lable = tk.Label(text="Set width:", font="Arial 14")
         self.text1 = tk.Entry()
         self.height_lable = tk.Label(text="Set height:", font="Arial 14")
@@ -30,22 +29,17 @@ class StartPage:
         global g_width, g_height
         g_width = int(self.text1.get())
         g_height = int(self.text2.get())
-
-        new_window = tk.Toplevel()
-        new_window.title("New Window")
-        new_window.resizable(False, False)
-        new_window.board = Snake()
-        #new_window.board.pack()
-
-
-
+        self.width_lable.grid_forget()
+        self.text1.grid_forget()
+        self.height_lable.grid_forget()
+        self.text2.grid_forget()
+        self.but.grid_forget()
+        board = Snake()
+        board.grid()
 
 
 
-
-
-
-class Snake(tk.Canvas):  # Создаем класс для записи атрибутов змейки
+class Snake(tk.Canvas, g_width, g_height):  # Создаем класс для записи атрибутов змейки
     # (суперкласс для унаследования атрибутов основного класса)
     # созадли для передачи свойств на холст
     def __init__(self):
@@ -230,8 +224,7 @@ def main():
     root.resizable(False, False)
     canvas = tk.Canvas()
     app = StartPage()
-    # board = Snake()
-    # board.pack()
     root.mainloop()
+
 
 main()

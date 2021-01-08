@@ -105,7 +105,7 @@ class Snake(tk.Canvas):
         self.move_snake()
         self.check_food_collision()
         self.check_bonus_collision()
-        self.after(game_speed, self.perform_actions)  # каждые 75 мс вызывает функцию
+        self.after(game_speed, self.perform_actions)
 
     def check_collisions(self):
         head_x_position, head_y_position = self.snake_positions[0]
@@ -118,7 +118,6 @@ class Snake(tk.Canvas):
         all_directions = ("Up", "Down", "Left", "Right")
         opposites = ({"Up", "Down"}, {"Left", "Right"})
         if new_direction in all_directions and {new_direction, self.directions} not in opposites:
-            # проверка на движение в себя
             self.directions = new_direction
 
     def check_food_collision(self):

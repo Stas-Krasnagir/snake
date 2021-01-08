@@ -9,36 +9,6 @@ g_width = 600
 g_height = 620
 
 
-class StartPage:
-    def __init__(self):
-        self.width_lable = tk.Label(text="Set width:", font="Arial 14")
-        self.text1 = tk.Entry()
-        self.height_lable = tk.Label(text="Set height:", font="Arial 14")
-        self.text2 = tk.Entry()
-        self.but = tk.Button(text="Start", font="Arial 20", command=self.start_snake)
-        self.lebel = tk.Label(width=27, font=15)
-
-        self.width_lable.grid(column=0, row=0)
-        self.text1.grid(column=1, row=0)
-
-        self.height_lable.grid(column=0, row=1)
-        self.text2.grid(column=1, row=1)
-        self.but.grid(column=1, row=3)
-
-    def start_snake(self):
-        global g_width, g_height
-        g_width = int(self.text1.get())
-        g_height = int(self.text2.get())
-        self.width_lable.grid_forget()
-        self.text1.grid_forget()
-        self.height_lable.grid_forget()
-        self.text2.grid_forget()
-        self.but.grid_forget()
-        board = Snake()
-        board.grid()
-
-
-
 class Snake(tk.Canvas):
     def __init__(self):
         super().__init__(width=g_width, height=g_height, background="black", highlightthickness=0)
@@ -51,8 +21,8 @@ class Snake(tk.Canvas):
         self.load_assets()
         self.create_objects()
         self.after(game_speed, self.perform_actions)
-    def load_assets(self):
 
+    def load_assets(self):
         try:
             self.snake_body_image = Image.open("./assets/snake.png")
             self.snake_body = ImageTk.PhotoImage(self.snake_body_image)
@@ -74,7 +44,6 @@ class Snake(tk.Canvas):
             tag="score", fill="#fff", font=("TkDefaultFront", 14))
 
         for x_position, y_position in self.snake_positions:
-
             self.create_image(x_position, y_position, image=self.snake_body, tag="snake")
 
         self.create_image(*self.food_position, image=self.food, tag="food")
@@ -155,7 +124,7 @@ class Snake(tk.Canvas):
     def check_bonus_collision(self):
         if self.snake_positions[0] == self.bonus_position:
             global moves_per_second
-            moves_per_second += 5
+            moves_per_second += 50
 
             self.bonus_position = self.set_new_bonus_position()
             self.coords(self.find_withtag("bonus"), self.bonus_position)
@@ -177,13 +146,37 @@ class Snake(tk.Canvas):
             font=14)
 
 
-def main():
-    root = tk.Tk()
-    root.title("Snake")
-    root.resizable(False, False)
-    canvas = tk.Canvas()
-    app = StartPage()
-    root.mainloop()
+root = tk.Tk()
+root.title("Snake")
+root.resizable(False, False)
 
 
-main()
+def start_snake():
+    global g_width, g_height
+    g_width = int(text1.get())
+    g_height = int(text2.get())
+    width_lable.grid_forget()
+    text1.grid_forget()
+    height_lable.grid_forget()
+    text2.grid_forget()
+    but.grid_forget()
+    board = Snake()
+    board.grid()
+
+
+width_lable = tk.Label(root, text="Set width:", font="Arial 14")
+text1 = tk.Entry(root)
+height_lable = tk.Label(root, text="Set height:", font="Arial 14")
+text2 = tk.Entry(root)
+but = tk.Button(root, text="Start", font="Arial 20", command=start_snake)
+lebel = tk.Label(root, width=27, font=15)
+
+width_lable.grid(column=0, row=0)
+text1.grid(column=1, row=0)
+
+height_lable.grid(column=0, row=1)
+text2.grid(column=1, row=1)
+but.grid(column=1, row=3)
+
+canvas = tk.Canvas()
+root.mainloop()

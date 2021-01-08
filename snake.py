@@ -156,7 +156,9 @@ class Snake(tk.Canvas):
         if self.snake_positions[0] == self.bonus_position:
             global moves_per_second
             moves_per_second += 5
+
             self.bonus_position = self.set_new_bonus_position()
+            self.coords(self.find_withtag("bonus"), self.bonus_position)
 
     def set_new_bonus_position(self):
         x_position = randint(1, (g_width // 20) - 1) * move_increment

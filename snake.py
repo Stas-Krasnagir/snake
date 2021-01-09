@@ -3,10 +3,10 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 move_increment = 20
-moves_per_second = 7
+moves_per_second = 1
 game_speed = 1000 // moves_per_second
-g_width = 600
-g_height = 620
+g_width = 300
+g_height = 320
 
 
 class Snake(tk.Canvas):
@@ -47,7 +47,7 @@ class Snake(tk.Canvas):
             self.create_image(x_position, y_position, image=self.snake_body, tag="snake")
 
         self.create_image(*self.food_position, image=self.food, tag="food")
-        self.create_image(*self.set_new_bonus_position(), image=self.bonus, tag="bonus")
+        self.create_image(*self.bonus_position, image=self.bonus, tag="bonus")
 
     def move_snake(self):
         global new_head_position
@@ -95,7 +95,7 @@ class Snake(tk.Canvas):
             self.snake_positions.append(self.snake_positions[-1])
             self.create_image(*self.snake_positions[-1], image=self.snake_body, tag="snake")
 
-            if self.score % 5 == 0:
+            if self.score % 1 == 5:
                 global moves_per_second
                 moves_per_second += 1
 
@@ -124,15 +124,18 @@ class Snake(tk.Canvas):
     def check_bonus_collision(self):
         if self.snake_positions[0] == self.bonus_position:
             global moves_per_second
-            moves_per_second += 50
+            moves_per_second += 10
 
             self.bonus_position = self.set_new_bonus_position()
             self.coords(self.find_withtag("bonus"), self.bonus_position)
 
+            score = self.find_withtag("score")
+            self.itemconfigure(score, text=f"Score: {self.score} (speed:{moves_per_second})", tag="score")
+
     def set_new_bonus_position(self):
-        x_position = randint(1, (g_width // 20) - 1) * move_increment
-        y_position = randint(3, (g_height // 20) - 1) * move_increment
-        bonus_position = (x_position, y_position)
+        x_position_b = randint(1, (g_width // 20) - 1) * move_increment
+        y_position_b = randint(3, (g_height // 20) - 1) * move_increment
+        bonus_position = (x_position_b, y_position_b)
         if bonus_position not in self.snake_positions and bonus_position not in self.food_position:
             return bonus_position
 

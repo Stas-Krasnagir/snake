@@ -154,18 +154,13 @@ root.resizable(False, False)
 
 
 def start_snake():
-    width = int(text1.get())
-    height = int(text2.get())
     global g_width, g_height
-    if width < 300:
-        g_width = width
-    else:
+    g_width = int(text1.get())
+    g_height = int(text2.get())
+    if g_width < 300:
         g_width = 300
-    if width < 300:
-        g_height = height
-    else:
+    if g_height < 320:
         g_height = 320
-
     width_lable.grid_forget()
     text1.grid_forget()
     height_lable.grid_forget()

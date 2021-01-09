@@ -5,9 +5,8 @@ from PIL import Image, ImageTk
 move_increment = 20
 moves_per_second = 1
 game_speed = 1000 // moves_per_second
-g_width = 300
-g_height = 320
-
+g_width = 600
+g_height = 620
 
 class Snake(tk.Canvas):
     def __init__(self):
@@ -155,9 +154,18 @@ root.resizable(False, False)
 
 
 def start_snake():
+    width = int(text1.get())
+    height = int(text2.get())
     global g_width, g_height
-    g_width = int(text1.get())
-    g_height = int(text2.get())
+    if width < 300:
+        g_width = width
+    else:
+        g_width = 300
+    if width < 300:
+        g_height = height
+    else:
+        g_height = 320
+
     width_lable.grid_forget()
     text1.grid_forget()
     height_lable.grid_forget()

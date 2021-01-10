@@ -14,15 +14,18 @@ class Snake(tk.Canvas):
         self.snake_positions = [(100, 100), (80, 100), (60, 100)]
 
         self.food_position = self.set_new_food_position()
-        self.bonus_position = self.set_new_bonus_position()
-        self.bonus_food_position = self.set_new_bonus_food_position()
+
+        self.bonus_position = [-100, -100]
+        self.bonus_food_position = [-100, -100]
 
         self.score = 0
-        self.game_speed = 150
+        self.game_speed = 200
         self.directions = "Right"
         self.bind_all("<Key>", self.on_key_press)
         self.load_assets()
         self.create_objects()
+        self.waiting_time = 15000
+        self.after(self.waiting_time, self.init_bonus)
         self.after(self.game_speed, self.perform_actions)
 
     def load_assets(self):
@@ -100,7 +103,7 @@ class Snake(tk.Canvas):
             self.snake_positions.append(self.snake_positions[-1])
             self.create_image(*self.snake_positions[-1], image=self.snake_body, tag="snake")
 
-            if self.score % 1 == 5:
+            if self.score % 5 == 0:
                 self.game_speed -= 1
 
             self.food_position = self.set_new_food_position()
@@ -119,12 +122,18 @@ class Snake(tk.Canvas):
 
     def check_bonus_collision(self):
         if self.snake_positions[0] == self.bonus_position:
-            self.game_speed -= 25
-            self.bonus_position = self.set_new_bonus_position()
+            self.game_speed -= 75
+            self.bonus_position = [-100, -100]
             self.coords(self.find_withtag("bonus"), self.bonus_position)
 
             score = self.find_withtag("score")
             self.itemconfigure(score, text=f"Score: {self.score} (speed:{self.game_speed})", tag="score")
+            self.after(10000, self.del_bonus_speed)
+
+    def del_bonus_speed(self):
+        self.game_speed += 75
+        score = self.find_withtag("score")
+        self.itemconfigure(score, text=f"Score: {self.score} (speed:{self.game_speed})", tag="score")
 
     def set_new_bonus_position(self):
         x_position_b = randint(1, (self.width // 20) - 1) * move_increment
@@ -141,19 +150,27 @@ class Snake(tk.Canvas):
                 self.create_image(*self.snake_positions[-1], image=self.snake_body, tag="snake")
                 rate_grow += 1
                 self.score += 2
-            rate_grow = 0
-            self.bonus_food_position = self.set_new_bonus_position()
 
+            self.bonus_food_position = [-100, -100]
             self.coords(self.find_withtag("bonus_food"), self.bonus_food_position)
+
             score = self.find_withtag("score")
             self.itemconfigure(score, text=f"Score: {self.score} (speed:{self.game_speed})", tag="score")
+            self.after(10000, self.del_bonus_food)
+
+    def del_bonus_food(self):
+        rate_grow = 0
+        while rate_grow < 10:
+            self.snake_positions.pop()
+            self.create_image(*self.snake_positions[-1], image=self.snake_body, tag="snake")
+            rate_grow += 1
 
     def set_new_bonus_food_position(self):
         x_position_bf = randint(1, (self.width // 20) - 1) * move_increment
         y_position_bf = randint(3, (self.height // 20) - 1) * move_increment
         bonus_food_position = (x_position_bf, y_position_bf)
         if bonus_food_position not in self.snake_positions \
-                and bonus_food_position not in self.food_position\
+                and bonus_food_position not in self.food_position \
                 and bonus_food_position not in self.bonus_position:
             return bonus_food_position
 
@@ -165,6 +182,13 @@ class Snake(tk.Canvas):
             text=f"Game over! You scored {self.score}!",
             fill="#fff",
             font=14)
+
+    def init_bonus(self):
+        self.bonus_position = self.set_new_bonus_position()
+        self.coords(self.find_withtag("bonus"), self.bonus_position)
+        self.bonus_food_position = self.set_new_bonus_food_position()
+        self.coords(self.find_withtag("bonus_food"), self.bonus_food_position)
+        self.after((self.waiting_time * 2), self.init_bonus)
 
 
 root = tk.Tk()

@@ -18,17 +18,15 @@ class Snake(tk.Canvas):
         self.bonus_position = [-100, -100]
         self.bonus_food_position = [-100, -100]
 
-
         self.score = 0
         self.game_speed = 200
         self.directions = "Right"
         self.bind_all("<Key>", self.on_key_press)
         self.load_assets()
         self.create_objects()
-        self.waiting_time = 15000
+        self.waiting_time = 10000
         self.after(self.waiting_time, self.init_bonus)
         self.after(self.game_speed, self.perform_actions)
-
 
     def load_assets(self):
         try:
@@ -161,19 +159,22 @@ class Snake(tk.Canvas):
             self.after(10000, self.del_bonus_food)
 
     def del_bonus_food(self):
+        #self.snake_positions = self.snake_positions[:-10]
+
         rate_grow = 0
         while rate_grow < 10:
             self.snake_positions.pop()
+
+            #self.snake_positions = self.snake_positions[:-1]
             rate_grow += 1
-
-
+        print("ok")
 
     def set_new_bonus_food_position(self):
         x_position_bf = randint(1, (self.width // 20) - 1) * move_increment
         y_position_bf = randint(3, (self.height // 20) - 1) * move_increment
         bonus_food_position = (x_position_bf, y_position_bf)
         if bonus_food_position not in self.snake_positions \
-                and bonus_food_position not in self.food_position\
+                and bonus_food_position not in self.food_position \
                 and bonus_food_position not in self.bonus_position:
             return bonus_food_position
 
@@ -185,18 +186,20 @@ class Snake(tk.Canvas):
             text=f"Game over! You scored {self.score}!",
             fill="#fff",
             font=14)
+        self.button_restart = tk.Button(root, text="Try again", font="Arial 20", command=self.restart)
+        self.button_restart.grid()
+
+    def restart(self):
+        self.button_restart.grid_forget()
+        self.destroy()
+        start_snake()
 
     def init_bonus(self):
         self.bonus_position = self.set_new_bonus_position()
         self.coords(self.find_withtag("bonus"), self.bonus_position)
         self.bonus_food_position = self.set_new_bonus_food_position()
         self.coords(self.find_withtag("bonus_food"), self.bonus_food_position)
-        self.after((self.waiting_time*2), self.init_bonus)
-
-
-
-
-
+        self.after((self.waiting_time * 2), self.init_bonus)
 
 
 root = tk.Tk()

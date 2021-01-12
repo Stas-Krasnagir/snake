@@ -159,15 +159,12 @@ class Snake(tk.Canvas):
             self.after(10000, self.del_bonus_food)
 
     def del_bonus_food(self):
-        #self.snake_positions = self.snake_positions[:-10]
-
         rate_grow = 0
         while rate_grow < 10:
             self.snake_positions.pop()
-
-            #self.snake_positions = self.snake_positions[:-1]
             rate_grow += 1
-        print("ok")
+        self.delete(tk.ALL)
+        self.create_objects()
 
     def set_new_bonus_food_position(self):
         x_position_bf = randint(1, (self.width // 20) - 1) * move_increment
